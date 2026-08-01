@@ -1,8 +1,13 @@
-import { renderHook, act } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useCreateTask } from '../../src/hooks/useCreateTask';
 
+beforeEach(async () => {
+  await AsyncStorage.clear();
+});
+
 describe('useCreateTask', () => {
-  it('crea la tarea en memoria', async () => {
+  it('crea la tarea', async () => {
     const { result } = await renderHook(() => useCreateTask());
 
     await act(async () => {
@@ -34,13 +39,46 @@ describe('useCreateTask', () => {
     expect(result.current.tasks[0].status).toBe('pending');
   });
 
-  it('no conserva las tareas entre montajes', async () => {
+  it('persiste las tareas y las recarga en un nuevo montaje', async () => {
     const first = await renderHook(() => useCreateTask());
     await act(async () => {
-      await first.result.current.submit('Efímera');
+      await first.result.current.submit('Persistente');
     });
+    await waitFor(() =>
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        'tasks',
+        expect.stringContaining('Persistente')
+      )
+    );
 
     const second = await renderHook(() => useCreateTask());
-    expect(second.result.current.tasks).toHaveLength(0);
+    await waitFor(() => expect(second.result.current.tasks).toHaveLength(1));
+    expect(second.result.current.tasks[0].title).toBe('Persistente');
+  });
+
+  it('guarda el estado tras marcar completada y tras eliminar', async () => {
+    const first = await renderHook(() => useCreateTask());
+    await act(async () => {
+      await first.result.current.submit('Cambiante');
+    });
+    const id = first.result.current.tasks[0].id;
+
+    await act(() => {
+      first.result.current.toggleTask(id);
+    });
+    await waitFor(() =>
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('tasks', expect.stringContaining('completed'))
+    );
+
+    const second = await renderHook(() => useCreateTask());
+    await waitFor(() => expect(second.result.current.tasks[0].status).toBe('completed'));
+
+    await act(() => {
+      second.result.current.removeTask(id);
+    });
+    await waitFor(() => expect(AsyncStorage.setItem).toHaveBeenCalledWith('tasks', '[]'));
+
+    const third = await renderHook(() => useCreateTask());
+    await waitFor(() => expect(third.result.current.tasks).toHaveLength(0));
   });
 });

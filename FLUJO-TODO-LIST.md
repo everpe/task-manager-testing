@@ -12,7 +12,7 @@ restaurante pequeño:
 
 | Pieza real | En el restaurante | Archivo |
 |---|---|---|
-| `useCreateTask` | **La cocina y la libreta de pedidos.** Guarda la lista real de tareas y es la única que puede cambiarla. | [src/hooks/useCreateTask.ts](src/hooks/useCreateTask.ts) |
+| `useCreateTask` | **La cocina y la libreta de pedidos.** Guarda la lista real de tareas, es la única que puede cambiarla y la copia al disco del teléfono. | [src/hooks/useCreateTask.ts](src/hooks/useCreateTask.ts) |
 | `CreateTaskScreen` | **El mesero jefe.** No cocina; lleva y trae información entre el cliente y la cocina. | [src/screens/CreateTaskScreen.tsx](src/screens/CreateTaskScreen.tsx) |
 | `TaskForm` | **La libreta donde el cliente escribe su pedido.** | [src/components/TaskForm.tsx](src/components/TaskForm.tsx) |
 | `TaskList` / `TaskCard` | **Los platos servidos en la mesa.** Solo muestran lo que la cocina preparó. | [src/components/TaskList.tsx](src/components/TaskList.tsx) |
@@ -271,20 +271,53 @@ más fácil de probar de todo el proyecto.
 
 ---
 
-## 7. "Sin persistencia": qué significa
+## 7. Dónde quedan guardadas las tareas
 
-La cocina guarda las tareas en la memoria de la aplicación mientras está abierta. Nada
-más. Cierras la app o recargas → la lista vuelve a estar vacía.
+Las tareas viven en la memoria de la app mientras está abierta, **y además se copian al
+disco del teléfono** con AsyncStorage. Cierras la app, la vuelves a abrir y siguen ahí.
+
+AsyncStorage es como una libreta pegada a la nevera: guarda texto simple bajo un nombre.
+Aquí el nombre es `'tasks'` y el texto es la lista entera convertida a JSON.
+
+Son dos momentos automáticos, ninguno lo dispara el usuario:
+
+**Al abrir la pantalla — leer la libreta**
 
 ```ts
-// ponytail: tareas solo en memoria, se pierden al cerrar la app
+useEffect(() => {
+  AsyncStorage.getItem('tasks').then((raw) => {
+    if (raw) setTasks(JSON.parse(raw));
+  });
+}, []);
 ```
 
-Antes esto llamaba a un servidor en `https://api.taskmanager.com` que no existe: por eso
-salía el error rojo. Ahora la tarea se crea localmente y siempre funciona.
+`useEffect` con `[]` al final significa *"haz esto una sola vez, al montar"*. Lee lo
+guardado y lo mete en la memoria. Si no hay nada, la lista arranca vacía.
 
-`submit` sigue siendo `async` aunque ya no espere a nadie — así, el día que se conecte
-un servidor real, cambia solo esa función y ni la pantalla ni el formulario se enteran.
+**Cada vez que la lista cambia — reescribir la libreta**
+
+```ts
+useEffect(() => {
+  if (!loaded.current) return;
+  AsyncStorage.setItem('tasks', JSON.stringify(tasks));
+}, [tasks]);
+```
+
+El `[tasks]` al final significa *"haz esto cada vez que `tasks` cambie"*. Crear, marcar
+completada o eliminar → se guarda solo. No hay que acordarse de guardar en cada acción.
+
+> **La línea rara del principio.** `if (!loaded.current) return` evita un accidente: al
+> abrir la app la lista arranca vacía por un instante, antes de que termine la lectura.
+> Sin esa línea, ese `[]` momentáneo se guardaría encima de las tareas reales y las
+> borraría. `loaded` es un interruptor que dice "ya terminé de leer, ahora sí puedes
+> guardar". Se usa `useRef` y no `useState` porque cambiarlo no debe redibujar nada.
+
+Ambas escrituras llevan `.catch(() => {})`: si el disco falla, la app sigue funcionando
+en memoria en vez de romperse. Guardar es un extra, no un requisito para operar.
+
+Detalle aparte: `submit` es `async` aunque hoy no espere a nadie. Así, el día que las
+tareas se manden a un servidor real, cambia solo esa función y ni la pantalla ni el
+formulario se enteran.
 
 ---
 
@@ -328,7 +361,7 @@ un servidor real, cambia solo esa función y ni la pantalla ni el formulario se 
 
 | Quieres entender... | Abre |
 |---|---|
-| Dónde viven las tareas y cómo cambian | [src/hooks/useCreateTask.ts](src/hooks/useCreateTask.ts) |
+| Dónde viven las tareas, cómo cambian y cómo se guardan | [src/hooks/useCreateTask.ts](src/hooks/useCreateTask.ts) |
 | Cómo se conecta todo | [src/screens/CreateTaskScreen.tsx](src/screens/CreateTaskScreen.tsx) |
 | El formulario | [src/components/TaskForm.tsx](src/components/TaskForm.tsx) |
 | Cómo se dibuja cada tarea | [src/components/TaskCard.tsx](src/components/TaskCard.tsx) |

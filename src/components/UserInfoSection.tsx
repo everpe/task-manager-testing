@@ -11,9 +11,10 @@ export interface UserInfo {
 interface Props {
   values: UserInfo;
   onChange: (field: keyof UserInfo, value: string) => void;
+  errors?: Partial<Record<keyof UserInfo, string>>;
 }
 
-export function UserInfoSection({ values, onChange }: Props) {
+export function UserInfoSection({ values, onChange, errors = {} }: Props) {
   return (
     <View className="gap-3">
       <Text className="text-lg font-bold text-gray-900">Información del usuario</Text>
@@ -22,6 +23,7 @@ export function UserInfoSection({ values, onChange }: Props) {
         testID="input-nombre"
         placeholder="Juan Pérez"
         value={values.nombre}
+        error={errors.nombre}
         onChangeText={(t) => onChange('nombre', t)}
       />
       <LabeledInput
@@ -31,6 +33,7 @@ export function UserInfoSection({ values, onChange }: Props) {
         keyboardType="email-address"
         autoCapitalize="none"
         value={values.email}
+        error={errors.email}
         onChangeText={(t) => onChange('email', t)}
       />
       <LabeledInput
@@ -39,6 +42,7 @@ export function UserInfoSection({ values, onChange }: Props) {
         placeholder="+57 300 000 0000"
         keyboardType="phone-pad"
         value={values.telefono}
+        error={errors.telefono}
         onChangeText={(t) => onChange('telefono', t)}
       />
     </View>

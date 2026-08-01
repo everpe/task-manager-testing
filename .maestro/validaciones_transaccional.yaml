@@ -1,0 +1,173 @@
+appId: com.taskmanager.app
+---
+# Verifica las validaciones de formato del checkout.
+# Se llenan TODOS los campos con datos inválidos y se confirma: la app debe
+# señalar cada campo malo y no completar la transacción.
+
+# 1. Abrir la app y entrar al flujo transaccional
+- launchApp:
+    clearState: true
+- assertVisible: 'Task Manager'
+- tapOn: 'Flujo Transaccional'
+- assertVisible: 'Información del usuario'
+
+# 2. Información del usuario con datos inválidos
+- tapOn:
+    id: 'input-nombre'
+- inputText: 'Juan123'
+- tapOn:
+    id: 'input-email'
+- inputText: 'juan-correo.com'
+- tapOn:
+    id: 'input-telefono'
+- inputText: '300ABC0000'
+
+# 3. Envío: código postal no numérico
+- scrollUntilVisible:
+    element:
+      id: 'input-direccion'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-direccion'
+- inputText: 'Calle 123 #45-67'
+- scrollUntilVisible:
+    element:
+      id: 'input-ciudad'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-ciudad'
+- inputText: 'Bogota'
+- scrollUntilVisible:
+    element:
+      id: 'input-codigo-postal'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-codigo-postal'
+- inputText: '11O1A1'
+
+# 4. Pago: tarjeta no numérica y vencimiento con formato inválido
+- scrollUntilVisible:
+    element:
+      id: 'input-titular'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-titular'
+- inputText: 'Juan Pérez'
+- scrollUntilVisible:
+    element:
+      id: 'input-numero-tarjeta'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-numero-tarjeta'
+- inputText: '4111-1111-1111-1111'
+- scrollUntilVisible:
+    element:
+      id: 'input-vencimiento'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-vencimiento'
+- inputText: '13/2028'
+- scrollUntilVisible:
+    element:
+      id: 'input-cvv'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-cvv'
+- inputText: '123'
+
+# 5. Confirmar: debe rechazar por formato
+- scrollUntilVisible:
+    element:
+      text: 'Confirmar pago'
+    direction: DOWN
+    centerElement: true
+- tapOn: 'Confirmar pago'
+- assertNotVisible: 'Transacción completada exitosamente'
+
+# 6. Cada campo inválido muestra su mensaje
+- scrollUntilVisible:
+    element:
+      text: 'El nombre solo permite letras'
+    direction: UP
+    centerElement: true
+- assertVisible: 'Correo electrónico inválido'
+- assertVisible: 'El teléfono solo permite números'
+- scrollUntilVisible:
+    element:
+      text: 'El código postal solo permite números'
+    direction: DOWN
+    centerElement: true
+- scrollUntilVisible:
+    element:
+      text: 'El número de tarjeta solo permite números'
+    direction: DOWN
+    centerElement: true
+- assertVisible: 'El vencimiento debe tener formato MM/AA'
+
+# 7. Corregir campo por campo y comprobar que el mensaje desaparece
+- scrollUntilVisible:
+    element:
+      id: 'input-nombre'
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: 'input-nombre'
+- eraseText
+- inputText: 'Juan Pérez'
+- tapOn:
+    id: 'input-email'
+- eraseText
+- inputText: 'juan@correo.com'
+- tapOn:
+    id: 'input-telefono'
+- eraseText
+- inputText: '3000000000'
+- scrollUntilVisible:
+    element:
+      id: 'input-codigo-postal'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-codigo-postal'
+- eraseText
+- inputText: '110111'
+- scrollUntilVisible:
+    element:
+      id: 'input-numero-tarjeta'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-numero-tarjeta'
+- eraseText
+- inputText: '4111111111111111'
+- scrollUntilVisible:
+    element:
+      id: 'input-vencimiento'
+    direction: DOWN
+    centerElement: true
+- tapOn:
+    id: 'input-vencimiento'
+- eraseText
+- inputText: '12/28'
+
+# 8. Ahora sí debe pasar y ningún mensaje debe quedar visible
+- scrollUntilVisible:
+    element:
+      text: 'Confirmar pago'
+    direction: DOWN
+    centerElement: true
+- tapOn: 'Confirmar pago'
+- assertVisible: 'Transacción completada exitosamente'
+- assertNotVisible: 'El nombre solo permite letras'
+- assertNotVisible: 'Correo electrónico inválido'
+- assertNotVisible: 'El teléfono solo permite números'
+- assertNotVisible: 'El código postal solo permite números'
+- assertNotVisible: 'El número de tarjeta solo permite números'
+- assertNotVisible: 'El vencimiento debe tener formato MM/AA'

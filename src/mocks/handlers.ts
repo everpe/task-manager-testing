@@ -20,3 +20,26 @@ export const handlers = [
 
   http.get(`${API_URL}/tasks`, () => HttpResponse.json(tasks)),
 ];
+
+// https://api.taskmanager.com/tasks - POST
+/**
+{
+  {
+    id: "234234",
+    title: "Tarea 1",
+    status: 'pending'
+  },
+  { status: 201 }
+}
+*/
+
+// https://api.taskmanager.com/tasks - GET
+/**
+[
+  {
+    id: "234234",
+    title: "Tarea 1",
+    status: 'pending'
+  }
+]
+*/

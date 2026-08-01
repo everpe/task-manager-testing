@@ -34,11 +34,6 @@ export function CreateTaskScreen() {
           Tarea creada exitosamente
         </Text>
       )}
-      {status === 'error' && (
-        <Text className="rounded-lg bg-red-100 px-4 py-3 text-sm font-medium text-red-800">
-          Error al crear la tarea
-        </Text>
-      )}
       <View className="flex-row gap-2">
         {FILTERS.map((f) => {
           const active = filter === f.value;

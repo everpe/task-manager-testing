@@ -6,18 +6,22 @@ export const KEYBOARD_ACCESSORY_ID = 'checkout-keyboard-accessory';
 
 interface LabeledInputProps extends TextInputProps {
   label: string;
+  error?: string;
 }
 
-export function LabeledInput({ label, ...rest }: LabeledInputProps) {
+export function LabeledInput({ label, error, ...rest }: LabeledInputProps) {
   return (
     <View className="gap-1">
       <Text className="text-sm font-medium text-gray-700">{label}</Text>
       <TextInput
         placeholderTextColor="#9ca3af"
         inputAccessoryViewID={Platform.OS === 'ios' ? KEYBOARD_ACCESSORY_ID : undefined}
-        className="rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-gray-900"
+        className={`rounded-lg border bg-white px-4 py-3 text-base text-gray-900 ${
+          error ? 'border-red-500' : 'border-gray-300'
+        }`}
         {...rest}
       />
+      {error && <Text className="text-sm text-red-600">{error}</Text>}
     </View>
   );
 }

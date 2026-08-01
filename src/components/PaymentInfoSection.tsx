@@ -12,9 +12,10 @@ export interface PaymentInfo {
 interface Props {
   values: PaymentInfo;
   onChange: (field: keyof PaymentInfo, value: string) => void;
+  errors?: Partial<Record<keyof PaymentInfo, string>>;
 }
 
-export function PaymentInfoSection({ values, onChange }: Props) {
+export function PaymentInfoSection({ values, onChange, errors = {} }: Props) {
   return (
     <View className="gap-3">
       <Text className="text-lg font-bold text-gray-900">Medio de pago</Text>
@@ -31,6 +32,7 @@ export function PaymentInfoSection({ values, onChange }: Props) {
         placeholder="4111 1111 1111 1111"
         keyboardType="phone-pad"
         value={values.numeroTarjeta}
+        error={errors.numeroTarjeta}
         onChangeText={(t) => onChange('numeroTarjeta', t)}
       />
       <LabeledInput
@@ -38,6 +40,7 @@ export function PaymentInfoSection({ values, onChange }: Props) {
         testID="input-vencimiento"
         placeholder="12/28"
         value={values.vencimiento}
+        error={errors.vencimiento}
         onChangeText={(t) => onChange('vencimiento', t)}
       />
       <LabeledInput

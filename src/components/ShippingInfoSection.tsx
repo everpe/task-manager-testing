@@ -11,9 +11,10 @@ export interface ShippingInfo {
 interface Props {
   values: ShippingInfo;
   onChange: (field: keyof ShippingInfo, value: string) => void;
+  errors?: Partial<Record<keyof ShippingInfo, string>>;
 }
 
-export function ShippingInfoSection({ values, onChange }: Props) {
+export function ShippingInfoSection({ values, onChange, errors = {} }: Props) {
   return (
     <View className="gap-3">
       <Text className="text-lg font-bold text-gray-900">Envío y entrega</Text>
@@ -37,6 +38,7 @@ export function ShippingInfoSection({ values, onChange }: Props) {
         placeholder="110111"
         keyboardType="phone-pad"
         value={values.codigoPostal}
+        error={errors.codigoPostal}
         onChangeText={(t) => onChange('codigoPostal', t)}
       />
     </View>

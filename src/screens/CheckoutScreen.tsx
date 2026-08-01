@@ -5,6 +5,7 @@ import { UserInfoSection, UserInfo } from '../components/UserInfoSection';
 import { ShippingInfoSection, ShippingInfo } from '../components/ShippingInfoSection';
 import { PaymentInfoSection, PaymentInfo } from '../components/PaymentInfoSection';
 import { KEYBOARD_ACCESSORY_ID } from '../components/LabeledInput';
+import { validateCheckout } from '../schemas/checkoutSchema';
 
 const emptyUser: UserInfo = { nombre: '', email: '', telefono: '' };
 const emptyShipping: ShippingInfo = { direccion: '', ciudad: '', codigoPostal: '' };
@@ -19,13 +20,18 @@ export function CheckoutScreen() {
   const [shipping, setShipping] = useState(emptyShipping);
   const [payment, setPayment] = useState(emptyPayment);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const submit = () => {
     if (!allFilled(user, shipping, payment)) {
+      setErrors({});
       setStatus('error');
       return;
     }
-    setStatus('success');
+    // ponytail: validar al confirmar, no mientras se escribe (no molesta a media palabra)
+    const found = validateCheckout({ ...user, ...shipping, ...payment });
+    setErrors(found);
+    setStatus(Object.keys(found).length > 0 ? 'idle' : 'success');
   };
 
   return (
@@ -37,13 +43,19 @@ export function CheckoutScreen() {
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets
     >
-      <UserInfoSection values={user} onChange={(f, v) => setUser((s) => ({ ...s, [f]: v }))} />
+      <UserInfoSection
+        values={user}
+        errors={errors}
+        onChange={(f, v) => setUser((s) => ({ ...s, [f]: v }))}
+      />
       <ShippingInfoSection
         values={shipping}
+        errors={errors}
         onChange={(f, v) => setShipping((s) => ({ ...s, [f]: v }))}
       />
       <PaymentInfoSection
         values={payment}
+        errors={errors}
         onChange={(f, v) => setPayment((s) => ({ ...s, [f]: v }))}
       />
 

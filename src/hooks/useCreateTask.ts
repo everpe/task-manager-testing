@@ -1,41 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createTask } from '../services/taskService';
+import { useState } from 'react';
 import { Task } from '../types';
 
-const STORAGE_KEY = 'tasks';
-
+// ponytail: tareas solo en memoria, se pierden al cerrar la app
 export function useCreateTask() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'success'>('idle');
   const [tasks, setTasks] = useState<Task[]>([]);
-  const loaded = useRef(false);
-
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (raw) setTasks(JSON.parse(raw));
-      })
-      .catch(() => {})
-      .finally(() => {
-        loaded.current = true;
-      });
-  }, []);
-
-  useEffect(() => {
-    // ponytail: no persistir antes de cargar, si no el [] inicial pisa lo guardado
-    if (!loaded.current) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)).catch(() => {});
-  }, [tasks]);
 
   const submit = async (title: string) => {
-    setStatus('loading');
-    try {
-      const task = await createTask(title);
-      setTasks((prev) => [task, ...prev]);
-      setStatus('success');
-    } catch {
-      setStatus('error');
-    }
+    const task: Task = {
+      id: Date.now().toString(),
+      title: title,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+    setTasks((prev) => [...prev, task]);
+    setStatus('success');
   };
 
   const removeTask = (id: string) => {

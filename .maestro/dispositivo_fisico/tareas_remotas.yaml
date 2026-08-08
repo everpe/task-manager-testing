@@ -1,0 +1,14 @@
+appId: com.taskmanager.app
+---
+# Flujo E2E para la pantalla nueva RemoteTasksScreen (creada para esta
+# actividad). A diferencia de las pruebas de integración con Jest, aquí NO
+# hay MSW: la app corre de verdad en el dispositivo y https://api.taskmanager.com
+# no es un backend real, por lo que la petición de carga inicial falla de
+# verdad. Este flujo valida que ese error de red real se maneje bien en la
+# UI (mensaje "Error al obtener las tareas"), un caso tan válido en E2E
+# como el camino feliz.
+
+- launchApp
+- assertVisible: "Task Manager"
+- tapOn: "Tareas remotas"
+- assertVisible: "Error al obtener las tareas"

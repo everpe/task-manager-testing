@@ -16,6 +16,12 @@ const ACCESOS: { href: string; titulo: string; descripcion: string; className: s
     descripcion: 'Datos de usuario, envío y pago',
     className: 'bg-emerald-600 active:bg-emerald-700',
   },
+  {
+    href: '/remote-tasks',
+    titulo: 'Tareas remotas',
+    descripcion: 'Crear tareas contra la API (mockeada con MSW)',
+    className: 'bg-purple-600 active:bg-purple-700',
+  },
 ];
 
 export function HomeScreen() {

@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="todo" options={{ title: 'Flujo Todo List' }} />
       <Stack.Screen name="checkout" options={{ title: 'Flujo Transaccional' }} />
+      <Stack.Screen name="remote-tasks" options={{ title: 'Tareas remotas' }} />
     </Stack>
   );
 }

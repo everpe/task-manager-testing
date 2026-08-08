@@ -1,11 +1,8 @@
 appId: com.taskmanager.app
 ---
-# Variante adaptada para dispositivo físico real: se agrega hideKeyboard
-# antes de cada scrollUntilVisible. En un dispositivo físico el teclado
-# permanece abierto entre campos y reduce el área visible de scroll,
-# haciendo que Maestro no encuentre el siguiente campo (a diferencia del
-# emulador/simulador, donde esto no ocurre). No cambia la lógica de la
-# prueba, solo estabiliza su ejecución en hardware real.
+# Variante para dispositivo físico: hideKeyboard solo tras cada inputText
+# real (nunca tras un tapOn de botón, para no disparar hideKeyboard con el
+# teclado ya cerrado). Timeout ampliado en los scrolls más largos.
 # Verifica las validaciones de formato del checkout.
 # Se llenan TODOS los campos con datos inválidos y se confirma: la app debe
 # señalar cada campo malo y no completar la transacción.
@@ -21,15 +18,17 @@ appId: com.taskmanager.app
 - tapOn:
     id: 'input-nombre'
 - inputText: 'Juan123'
+- hideKeyboard
 - tapOn:
     id: 'input-email'
 - inputText: 'juan-correo.com'
+- hideKeyboard
 - tapOn:
     id: 'input-telefono'
 - inputText: '300ABC0000'
+- hideKeyboard
 
 # 3. Envío: código postal no numérico
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: 'input-direccion'
@@ -59,9 +58,9 @@ appId: com.taskmanager.app
 - tapOn:
     id: 'input-codigo-postal'
 - inputText: '11O1A1'
+- hideKeyboard
 
 # 4. Pago: tarjeta no numérica y vencimiento con formato inválido
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: 'input-titular'
@@ -101,9 +100,9 @@ appId: com.taskmanager.app
 - tapOn:
     id: 'input-cvv'
 - inputText: '123'
+- hideKeyboard
 
 # 5. Confirmar: debe rechazar por formato
-- hideKeyboard
 - scrollUntilVisible:
     element:
       text: 'Confirmar pago'
@@ -119,7 +118,7 @@ appId: com.taskmanager.app
       text: 'El nombre solo permite letras'
     direction: UP
     centerElement: true
-    timeout: 25000
+    timeout: 20000
 - assertVisible: 'Correo electrónico inválido'
 - assertVisible: 'El teléfono solo permite números'
 - scrollUntilVisible:
@@ -147,10 +146,12 @@ appId: com.taskmanager.app
     id: 'input-nombre'
 - eraseText
 - inputText: 'Juan Pérez'
+- hideKeyboard
 - tapOn:
     id: 'input-email'
 - eraseText
 - inputText: 'juan@correo.com'
+- hideKeyboard
 - tapOn:
     id: 'input-telefono'
 - eraseText
@@ -188,9 +189,9 @@ appId: com.taskmanager.app
     id: 'input-vencimiento'
 - eraseText
 - inputText: '12/28'
+- hideKeyboard
 
 # 8. Ahora sí debe pasar y ningún mensaje debe quedar visible
-- hideKeyboard
 - scrollUntilVisible:
     element:
       text: 'Confirmar pago'
